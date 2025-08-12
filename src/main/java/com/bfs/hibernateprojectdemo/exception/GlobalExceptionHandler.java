@@ -13,4 +13,14 @@ public class GlobalExceptionHandler {
         DataResponse body = DataResponse.builder().message(ex.getMessage()).build();
         return ResponseEntity.status(400).body(body);
     }
+
+    @ExceptionHandler(UsernameFoundException.class)
+    public ResponseEntity<DataResponse> handleUsernameFoundException(UsernameFoundException exception) {
+        DataResponse body = DataResponse.builder()
+                .code(409)
+                .message(exception.getMessage())
+                .build();
+
+        return ResponseEntity.status(409).body(body);
+    }
 }

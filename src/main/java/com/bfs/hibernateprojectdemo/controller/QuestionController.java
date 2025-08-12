@@ -5,6 +5,8 @@ import com.bfs.hibernateprojectdemo.domain.Question;
 import com.bfs.hibernateprojectdemo.dto.question.QuestionCreationRequest;
 import com.bfs.hibernateprojectdemo.exception.TooManyQuestionsException;
 import com.bfs.hibernateprojectdemo.service.QuestionService;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -13,10 +15,15 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+
 @Controller
 public class QuestionController {
+
     private final QuestionService questionService;
 
+    @Autowired
     public QuestionController(QuestionService questionService) {
         this.questionService = questionService;
     }

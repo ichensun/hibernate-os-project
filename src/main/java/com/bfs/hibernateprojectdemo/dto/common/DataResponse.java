@@ -6,7 +6,8 @@ import lombok.Data;
 @Data
 @Builder
 public class DataResponse {
-    private String message;
+    private Integer code;
     private Object data;
+    private String message;
 }
 
