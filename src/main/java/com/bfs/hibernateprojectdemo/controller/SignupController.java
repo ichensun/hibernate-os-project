@@ -18,15 +18,13 @@ import javax.validation.Valid;
 import lombok.AllArgsConstructor;
 
 @RestController
-@RequestMapping("/api/v1/auth")
 @AllArgsConstructor
 public class SignupController {
 
     private final SignupService signupService;
 
     @PostMapping("/signup")
-    public ResponseEntity<DataResponse> signup(@Valid @RequestBody RegistrationRequest request) {
-
+    public ResponseEntity<DataResponse> signup(@RequestBody RegistrationRequest request) {
         User newUser = signupService.signup(request);
         RegistrationResponse response = RegistrationResponse.builder()
                 .userId(newUser.getUserId())

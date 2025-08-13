@@ -23,4 +23,15 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(409).body(body);
     }
+
+    @ExceptionHandler(NotEnoughInventoryException.class)
+    public ResponseEntity<String> handleInventoryException(NotEnoughInventoryException ex) {
+        return ResponseEntity.badRequest().body(ex.getMessage());
+    }
+
+    @ExceptionHandler(CancelCompeteOrderException.class)
+    public ResponseEntity<String> handleCancelCompleteOrderException(CancelCompeteOrderException ex) {
+        return ResponseEntity.badRequest().body(ex.getMessage());
+    }
+
 }

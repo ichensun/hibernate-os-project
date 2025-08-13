@@ -24,7 +24,7 @@ import lombok.ToString;
 @Table(name="users")
 @Getter
 @Setter
-@ToString(exclude = {"permissions"})
+@ToString(exclude = {"permissions", "orders"})
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -47,10 +47,10 @@ public class User {
     @Column(name = "username")
     private String username;
 
-    @ManyToMany(mappedBy = "users")
+    @ManyToMany(mappedBy = "users", fetch = FetchType.LAZY)
     private List<Product> products;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "user")
     private List<Permission> permissions;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch =
