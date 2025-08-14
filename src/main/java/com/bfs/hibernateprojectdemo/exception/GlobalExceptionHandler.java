@@ -16,6 +16,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UsernameFoundException.class)
     public ResponseEntity<DataResponse> handleUsernameFoundException(UsernameFoundException exception) {
+
         DataResponse body = DataResponse.builder()
                 .code(409)
                 .message(exception.getMessage())

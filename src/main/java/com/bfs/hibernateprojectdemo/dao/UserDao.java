@@ -29,8 +29,6 @@ public class UserDao {
                     .setParameter("username", username)
                     .uniqueResult();
 
-            System.out.println(user.getUsername());
-            System.out.println(user.getPassword());
             transaction.commit();
             return Optional.ofNullable(user);
         } catch (Exception e) {

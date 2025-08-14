@@ -4,7 +4,7 @@ import com.bfs.hibernateprojectdemo.dao.ProductDao;
 import com.bfs.hibernateprojectdemo.domain.Product;
 import com.bfs.hibernateprojectdemo.dto.CreateProductRequest;
 import com.bfs.hibernateprojectdemo.dto.ProductDetailDTO;
-import com.bfs.hibernateprojectdemo.dto.StatsDTO;
+import com.bfs.hibernateprojectdemo.dto.ProductDTO;
 import com.bfs.hibernateprojectdemo.dto.UpdateProductRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,17 +41,18 @@ public class ProductService {
                 .build();
     }
 
-    public List<StatsDTO> getTopRecentPurchasedProducts(Long userId, int limit) {
-        return productDao.findTopPurchasedProductsByUser(userId, limit);
+    public List<ProductDTO> getMostRecentPurchasedProducts(Long userId, int limit) {
+        return productDao.getMostRecentPurchasedProducts(userId, limit);
     }
 
     public Long addNewProduct(CreateProductRequest request) {
-        Product product = new Product();
-        product.setName(request.getName());
-        product.setDescription(request.getDescription());
-        product.setWholesalePrice(request.getWholesalePrice());
-        product.setRetailPrice(request.getRetailPrice());
-        product.setQuantity(request.getQuantity());
+        Product product = Product.builder()
+                .name(request.getName())
+                .description(request.getDescription())
+                .wholesalePrice(request.getWholesalePrice())
+                .retailPrice(request.getRetailPrice())
+                .quantity(request.getQuantity())
+                .build();
 
         return productDao.saveProduct(product);
     }

@@ -4,32 +4,42 @@ import com.bfs.hibernateprojectdemo.domain.Order;
 import com.bfs.hibernateprojectdemo.domain.OrderItem;
 import com.bfs.hibernateprojectdemo.domain.Product;
 import com.bfs.hibernateprojectdemo.domain.User;
-import com.bfs.hibernateprojectdemo.dto.StatsDTO;
+import com.bfs.hibernateprojectdemo.dto.ProductDTO;
 import com.bfs.hibernateprojectdemo.dto.UpdateProductRequest;
+import com.bfs.hibernateprojectdemo.service.UserService;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
+import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Selection;
 
 @Repository
 public class ProductDao {
 
     private final SessionFactory sessionFactory;
 
+    private final EntityManager entityManager;
+
     @Autowired
-    public ProductDao(SessionFactory sessionFactory) {
+    public ProductDao(SessionFactory sessionFactory, EntityManager entityManager) {
         this.sessionFactory = sessionFactory;
+        this.entityManager = entityManager;
     }
 
     public List<Product> getAllInStockProducts() {
@@ -63,41 +73,118 @@ public class ProductDao {
         }
     }
 
-    public List<StatsDTO> findTopPurchasedProductsByUser(Long userId, int limit) {
-        try (Session session = sessionFactory.openSession()) {
-            CriteriaBuilder cb = session.getCriteriaBuilder();
-            CriteriaQuery<StatsDTO> query = cb.createQuery(StatsDTO.class);
+//    public List<ProductDTO> getMostFrequentlyPurchasedProducts(Long userId, int limit) {
+//        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+//        CriteriaQuery<Object[]> query = cb.createQuery(Object[].class);
+//
+//        // Define root and joins
+//        Root<OrderItem> orderItemRoot = query.from(OrderItem.class);
+//        Join<OrderItem, Order> orderJoin = orderItemRoot.join("order");
+//        Join<OrderItem, Product> productJoin = orderItemRoot.join("product");
+//        Join<Order, User> userJoin = orderJoin.join("user");
+//
+//        // Calculate frequency (sum of quantities) and get product details
+//        Expression<Long> frequency = cb.sum(orderItemRoot.get("quantity").as(Long.class));
+//        Expression<Double> avgPrice = cb.avg(orderItemRoot.get("purchasedPrice"));
+//        Expression<LocalDateTime> lastPurchaseDate = cb.greatest(orderJoin.get("datePlaced"));
+//
+//        // Select grouped fields with aggregations
+//        query.multiselect(
+//                productJoin.get("productId"),
+//                productJoin.get("name"),
+//                productJoin.get("description"),
+//                frequency,
+//                avgPrice,
+//                lastPurchaseDate,
+//                cb.literal("Completed")
+//        );
+//
+//        // Add WHERE conditions
+//        query.where(
+//                cb.and(
+//                        cb.equal(userJoin.get("userId"), userId),
+//                        cb.notEqual(orderJoin.get("orderStatus"), "Canceled")
+//                )
+//        );
+//
+//        // Group by product to calculate frequency
+//        query.groupBy(
+//                productJoin.get("productId"),
+//                productJoin.get("name"),
+//                productJoin.get("description")
+//        );
+//
+//        // Order by frequency (descending) - most frequent first
+//        // Use product_id as tiebreaker for consistency
+//        query.orderBy(
+//                cb.desc(frequency),
+//                cb.desc(productJoin.get("productId"))
+//        );
+//
+//        // Execute query
+//        TypedQuery<Object[]> typedQuery = entityManager.createQuery(query);
+//        typedQuery.setMaxResults(limit);
+//
+//        List<Object[]> results = typedQuery.getResultList();
+//
+//        // Manually map Object[] to ProductDTO
+//        return results.stream()
+//                .map(row -> ProductDTO.builder()
+//                        .itemId(null)  // Not applicable for frequency-based results
+//                        .productId(String.valueOf(row[0]))
+//                        .productName((String) row[1])
+//                        .description((String) row[2])
+//                        .quantity(((Long) row[3]).intValue())  // Total quantity purchased
+//                        .purchasedPrice((Double) row[4])       // Average price
+//                        .datePlaced((LocalDateTime) row[5])    // Last purchase date
+//                        .orderStatus((String) row[6])
+//                        .build())
+//                .collect(Collectors.toList());
+//    }
 
-            // Root entity
-            Root<Order> orderRoot = query.from(Order.class);
-            System.out.println(orderRoot.getModel());
-            Join<Order, OrderItem> orderItemJoin = orderRoot.join("orderItems");
-            Join<OrderItem, Product> productJoin = orderItemJoin.join("product");
+    public List<ProductDTO> getMostRecentPurchasedProducts(Long userId, int limit) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<ProductDTO> query = cb.createQuery(ProductDTO.class);
 
-            query.groupBy(productJoin.get("productId"));
+        // define root and joins
+        Root<OrderItem> orderItemRoot = query.from(OrderItem.class);
+        Join<OrderItem, Order> orderJoin = orderItemRoot.join("order");
+        Join<OrderItem, Product> productJoin = orderItemRoot.join("product");
+        Join<Order, User> userJoin = orderJoin.join("user");
 
-            Expression<Long> sumQuantity = cb.sum(orderItemJoin.get("quantity"));
+        // Create constructor expression for ProductDTO
+        Selection<ProductDTO> selection = cb.construct(ProductDTO.class,
+                orderItemRoot.get("itemId"),
+                productJoin.get("productId"),
+                productJoin.get("name"),
+                productJoin.get("description"),
+                orderItemRoot.get("quantity"),
+                orderItemRoot.get("purchasedPrice"),
+                orderJoin.get("datePlaced"),
+                orderJoin.get("orderStatus")
+        );
 
-            query.select(cb.construct(
-                    StatsDTO.class,
-                    productJoin,
-                    sumQuantity
-            ));
+        query.select(selection);
 
-            query.where(
-                    cb.and(
-                            cb.equal(orderRoot.get("user").get("userId"), userId),
-                            cb.notEqual(orderRoot.get("orderStatus"), "Canceled")
-                    )
-            );
+        // Add WHERE conditions
+        query.where(
+                cb.and(
+                        cb.equal(userJoin.get("userId"), userId),
+                        cb.notEqual(orderJoin.get("orderStatus"), "Canceled")
+                )
+        );
 
-            // Order by quantity DESC
-            query.orderBy(cb.desc(sumQuantity));
+        // Add ORDER BY conditions
+        query.orderBy(
+                cb.desc(orderJoin.get("datePlaced")),
+                cb.desc(orderItemRoot.get("itemId"))
+        );
 
-            return session.createQuery(query)
-                    .setMaxResults(limit)
-                    .getResultList();
-        }
+        // Create and execute query
+        TypedQuery<ProductDTO> typedQuery = entityManager.createQuery(query);
+        typedQuery.setMaxResults(limit);
+
+        return typedQuery.getResultList();
     }
 
     public Long saveProduct(Product product) {
