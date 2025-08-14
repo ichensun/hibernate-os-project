@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-@Entity(name="users")
+@Entity
 @Table(name="users")
 @Getter
 @Setter
@@ -42,16 +42,16 @@ public class User {
     private String password;
 
     @Column(name = "role")
-    private Integer role;
+    private String role;
 
     @Column(name = "username")
     private String username;
 
     @ManyToMany(mappedBy = "users", fetch = FetchType.LAZY)
-    private List<Product> products;
+    private List<Product> watchlist;
 
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "user")
-    private List<Permission> permissions;
+//    @OneToMany(fetch = FetchType.EAGER, mappedBy = "user")
+//    private List<Permission> permissions;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch =
             FetchType.LAZY)

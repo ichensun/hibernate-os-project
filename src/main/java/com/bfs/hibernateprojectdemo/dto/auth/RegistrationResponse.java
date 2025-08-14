@@ -14,7 +14,7 @@ public class RegistrationResponse {
 
     private String email;
 
-    private Integer role;
+    private String role;
 
     @JsonProperty("username")
     private String userName;

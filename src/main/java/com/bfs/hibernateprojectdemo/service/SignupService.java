@@ -20,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 public class SignupService {
 
     private final SignupDao signupDao;
+    private final PasswordEncoder passwordEncoder;
 
     public User signup(RegistrationRequest request) {
 
@@ -33,7 +34,8 @@ public class SignupService {
                     " use a different username");
         }
 
-        User savedUser = signupDao.createUser(userName, email, new BCryptPasswordEncoder().encode(password));
+        String encodedPassword = passwordEncoder.encode(password);
+        User savedUser = signupDao.createUser(userName, email, encodedPassword);
 
         return User.builder()
                 .userId(savedUser.getUserId())

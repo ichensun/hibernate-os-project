@@ -24,18 +24,19 @@ public class UserDao {
         try (Session session = sessionFactory.openSession()) {
             Transaction transaction = session.beginTransaction();
 
-            String hqlQuery = "FROM users u WHERE u.username = :username";
+            String hqlQuery = "FROM User u WHERE u.username = :username";
             User user = session.createQuery(hqlQuery, User.class)
                     .setParameter("username", username)
                     .uniqueResult();
 
+            System.out.println(user.getUsername());
+            System.out.println(user.getPassword());
             transaction.commit();
             return Optional.ofNullable(user);
         } catch (Exception e) {
             e.printStackTrace();
-            return Optional.empty();
         }
-
+        return Optional.empty();
     }
 
 }

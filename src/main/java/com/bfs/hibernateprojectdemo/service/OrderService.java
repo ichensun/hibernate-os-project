@@ -23,6 +23,7 @@ public class OrderService {
         this.orderDao = orderDao;
     }
 
+
     @Transactional
     public List<OrderDTO> getAllOrders() {
         List<Order> orders = orderDao.getAllOrders();

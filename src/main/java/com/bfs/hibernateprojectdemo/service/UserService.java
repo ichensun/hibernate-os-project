@@ -41,20 +41,16 @@ public class UserService implements UserDetailsService {
         return AuthUserDetail.builder()
                 .username(user.getUsername())
                 .password(new BCryptPasswordEncoder().encode(user.getPassword()))
-                .authorities(getAuthoritiesUser(user))
+                .authorities(getUserRole(user))
                 .accountNonExpired(true)
                 .accountNonLocked(true)
                 .enabled(true)
                 .build();
     }
 
-    private List<GrantedAuthority> getAuthoritiesUser(User user) {
+    private List<GrantedAuthority> getUserRole(User user) {
         List<GrantedAuthority> userAuthorities = new ArrayList<>();
-
-        for (Permission p : user.getPermissions()) {
-            userAuthorities.add(new SimpleGrantedAuthority(p.getValue()));
-        }
-
+        userAuthorities.add(new SimpleGrantedAuthority(user.getRole()));
         return userAuthorities;
     }
 }

@@ -3,9 +3,10 @@ package com.bfs.hibernateprojectdemo.controller;
 import com.bfs.hibernateprojectdemo.dto.auth.LoginRequest;
 import com.bfs.hibernateprojectdemo.dto.auth.LoginResponse;
 import com.bfs.hibernateprojectdemo.security.AuthUserDetail;
-import com.bfs.hibernateprojectdemo.security.JWTProvider;
+import com.bfs.hibernateprojectdemo.security.JwtProvider;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,24 +27,24 @@ public class LoginController {
         this.authenticationManager = authenticationManager;
     }
 
-    private JWTProvider jwtProvider;
+    private JwtProvider jwtProvider;
 
     @Autowired
-    private void setJwtProvider(JWTProvider jwtProvider) {
+    private void setJwtProvider(JwtProvider jwtProvider) {
         this.jwtProvider = jwtProvider;
     }
 
+    @PreAuthorize("hasRole('USER')")
     @PostMapping("/login")
     public LoginResponse login(@RequestBody LoginRequest request) {
 
         Authentication authentication;
 
-        // Try to authenticate the user using the username and password
+        // authenticate the user using the username and password
         try {
             authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
             );
-
         } catch (AuthenticationException e) {
             throw new BadCredentialsException("Provided credential is invalid.");
         }

@@ -23,7 +23,7 @@ public class SignupDao {
     public Optional<User> findUserByUsername(String username) {
         try (Session session = sessionFactory.openSession()) {
 
-            String hql = "FROM users u WHERE u.username = :username";
+            String hql = "FROM User u WHERE u.username = :username";
             return session.createQuery(hql, User.class)
                     .setParameter("username", username)
                     .setMaxResults(1)
@@ -38,13 +38,13 @@ public class SignupDao {
     public User createUser(String username, String email,
                            String encryptedPassword) {
 
-        Session session = sessionFactory.getCurrentSession();
+        Session session = sessionFactory.openSession();
         Transaction transaction = session.beginTransaction();
 
         User user = User.builder()
                 .username(username)
                 .password(encryptedPassword)
-                .role(0)
+                .role("USER")
                 .email(email)
                 .build();
 
