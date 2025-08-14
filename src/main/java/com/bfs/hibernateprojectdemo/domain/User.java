@@ -42,7 +42,7 @@ public class User {
     private String password;
 
     @Column(name = "role")
-    private String role;
+    private Integer role;
 
     @Column(name = "username")
     private String username;

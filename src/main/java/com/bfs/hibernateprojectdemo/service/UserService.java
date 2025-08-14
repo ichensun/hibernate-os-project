@@ -1,7 +1,6 @@
 package com.bfs.hibernateprojectdemo.service;
 
 import com.bfs.hibernateprojectdemo.dao.UserDao;
-import com.bfs.hibernateprojectdemo.domain.Permission;
 import com.bfs.hibernateprojectdemo.domain.User;
 import com.bfs.hibernateprojectdemo.security.AuthUserDetail;
 
@@ -50,7 +49,8 @@ public class UserService implements UserDetailsService {
 
     private List<GrantedAuthority> getUserRole(User user) {
         List<GrantedAuthority> userAuthorities = new ArrayList<>();
-        userAuthorities.add(new SimpleGrantedAuthority(user.getRole()));
+        String userRole = user.getRole() == 0 ? "USER" : "ADMIN";
+        userAuthorities.add(new SimpleGrantedAuthority(userRole));
         return userAuthorities;
     }
 }

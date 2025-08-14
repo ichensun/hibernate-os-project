@@ -1,6 +1,5 @@
 package com.bfs.hibernateprojectdemo.config;
 
-import com.bfs.hibernateprojectdemo.security.JwtFilter;
 import com.bfs.hibernateprojectdemo.service.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +10,6 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -22,17 +20,17 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     private UserService userService;
-    private JwtFilter jwtFilter;
+//    private JwtFilter jwtFilter;
 
     @Autowired
     public void setUserService(UserService userService) {
         this.userService = userService;
     }
 
-    @Autowired
-    public void setJwtFilter(JwtFilter jwtFilter) {
-        this.jwtFilter = jwtFilter;
-    }
+//    @Autowired
+//    public void setJwtFilter(JwtFilter jwtFilter) {
+//        this.jwtFilter = jwtFilter;
+//    }
 
     @Bean
     public AuthenticationManager authenticationManagerBean(HttpSecurity http) throws Exception {
@@ -54,9 +52,12 @@ public class SecurityConfig {
                 .antMatchers("/orders").permitAll()
                 .antMatchers("/orders/*").permitAll()
                 .antMatchers("/orders/*/cancel").permitAll()
+//                .antMatchers("/watchlist/*/products/all").hasRole("USER")
+//                .antMatchers("/watchlist/product/*/user/*").hasRole("USER")
                 .antMatchers("/watchlist/*/products/all").permitAll()
                 .antMatchers("/watchlist/product/*/user/*").permitAll()
                 .antMatchers("/products").permitAll()
+                .antMatchers("/products/recent/*/user/*").permitAll()
                 .anyRequest()
                 .authenticated();
         return http.build();

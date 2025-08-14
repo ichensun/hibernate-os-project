@@ -44,7 +44,7 @@ public class SignupDao {
         User user = User.builder()
                 .username(username)
                 .password(encryptedPassword)
-                .role("USER")
+                .role(0)
                 .email(email)
                 .build();
 

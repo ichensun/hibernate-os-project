@@ -28,7 +28,7 @@ public class WatchlistController {
     }
 
     @GetMapping("/{id}/products/all")
-    @PreAuthorize("hasRole(0)")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<List<Product>> getAllWatchlist(@PathVariable Long id) {
         System.out.println(1);
         List<Product> watchlist = watchlistService.getWatchlistProducts(id);
@@ -36,6 +36,7 @@ public class WatchlistController {
     }
 
     @PostMapping("/product/{productId}/user/{userId}")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<String> addProduct(@PathVariable Long userId,
                                              @PathVariable Long productId) {
         watchlistService.addToWatchlist(userId, productId);
@@ -43,6 +44,7 @@ public class WatchlistController {
     }
 
     @DeleteMapping("/product/{productId}/user/{userId}")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<String> removeProduct(@PathVariable Long userId, @PathVariable Long productId) {
         watchlistService.removeFromWatchlist(userId, productId);
         return ResponseEntity.ok("Product removed from watchlist");

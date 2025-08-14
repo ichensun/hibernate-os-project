@@ -41,19 +41,19 @@ public class ProductService {
                 .build();
     }
 
-    public List<StatsDTO> getTopPurchasedProducts(Long userId, int limit) {
+    public List<StatsDTO> getTopRecentPurchasedProducts(Long userId, int limit) {
         return productDao.findTopPurchasedProductsByUser(userId, limit);
     }
 
-    public void addNewProduct(CreateProductRequest request) {
+    public Long addNewProduct(CreateProductRequest request) {
         Product product = new Product();
         product.setName(request.getName());
         product.setDescription(request.getDescription());
         product.setWholesalePrice(request.getWholesalePrice());
         product.setRetailPrice(request.getRetailPrice());
         product.setQuantity(request.getQuantity());
-        System.out.println(product);
-        productDao.saveProduct(product);
+
+        return productDao.saveProduct(product);
     }
 
     public void updateProduct(Long productId, UpdateProductRequest request) {

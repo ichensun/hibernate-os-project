@@ -4,6 +4,7 @@ import com.bfs.hibernateprojectdemo.domain.Product;
 import com.bfs.hibernateprojectdemo.dto.CreateProductRequest;
 import com.bfs.hibernateprojectdemo.dto.ProductDetailDTO;
 import com.bfs.hibernateprojectdemo.dto.UpdateProductRequest;
+import com.bfs.hibernateprojectdemo.dto.common.DataResponse;
 import com.bfs.hibernateprojectdemo.service.ProductService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+import javax.xml.crypto.Data;
+
 @RestController
 public class ProductController {
 
@@ -30,31 +33,54 @@ public class ProductController {
 
     // user & admin
     @GetMapping("/products/all")
-    public List<Product> getAllInStockProducts() {
-        return productService.getAllInStockProducts();
+    public ResponseEntity<DataResponse> getAllInStockProducts() {
+        List<Product> products = productService.getAllInStockProducts();
+
+        DataResponse dataResponse = DataResponse.builder()
+                .code(200)
+                .data(products)
+                .message("Get all in-stock products")
+                .build();
+
+        return ResponseEntity.ok(dataResponse);
     }
 
-    // user & admin
     @GetMapping("/products/{id}")
-    public ProductDetailDTO getProductDetailById(@PathVariable Long id) {
-        return productService.getProductDetailById(id);
+    public ResponseEntity<DataResponse> getProductDetailById(@PathVariable Long id) {
+        ProductDetailDTO productDetailDTO = productService.getProductDetailById(id);
+
+        return ResponseEntity.ok(DataResponse.builder()
+                        .code(200).data(productDetailDTO).message("Get " +
+                        "product detail by id").build());
     }
 
     // listing
-    // admin
+    // admin add product
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/products")
-    public ResponseEntity<String> addProduct(@RequestBody CreateProductRequest request) {
-        productService.addNewProduct(request);
-        return ResponseEntity.ok("Product added successfully");
+    public ResponseEntity<DataResponse> addProduct(@RequestBody CreateProductRequest request) {
+        Long productId = productService.addNewProduct(request);
+
+        return ResponseEntity.ok(
+                DataResponse.builder()
+                        .code(200)
+                        .data(productId)
+                        .message("Product added")
+                        .build());
     }
 
+    // admin update product
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/products/{productId}")
-    public ResponseEntity<String> updateProduct(
-            @PathVariable Long productId,
-            @RequestBody UpdateProductRequest request) {
+    public ResponseEntity<DataResponse> updateProduct(@PathVariable Long productId,
+                                                      @RequestBody UpdateProductRequest request) {
         productService.updateProduct(productId, request);
-        return ResponseEntity.ok("Product updated successfully");
+
+        return ResponseEntity.ok(
+                DataResponse.builder()
+                        .code(200)
+                        .data(null)
+                        .message("Product updated")
+                        .build());
     }
 }

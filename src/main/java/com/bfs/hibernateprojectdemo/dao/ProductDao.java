@@ -1,5 +1,7 @@
 package com.bfs.hibernateprojectdemo.dao;
 
+import com.bfs.hibernateprojectdemo.domain.Order;
+import com.bfs.hibernateprojectdemo.domain.OrderItem;
 import com.bfs.hibernateprojectdemo.domain.Product;
 import com.bfs.hibernateprojectdemo.domain.User;
 import com.bfs.hibernateprojectdemo.dto.StatsDTO;
@@ -14,6 +16,11 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 import javax.persistence.EntityNotFoundException;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Root;
 
 @Repository
 public class ProductDao {
@@ -45,7 +52,7 @@ public class ProductDao {
 
     public List<Product> getWatchlistProducts(Long userId) {
         try (Session session = sessionFactory.openSession()) {
-            User user = session.createQuery("SELECT u FROM users u JOIN FETCH" +
+            User user = session.createQuery("SELECT u FROM User u JOIN FETCH" +
                             " u.watchlist WHERE u.userId = :userId",
                     User.class).setParameter("userId", userId).uniqueResult();
 
@@ -58,25 +65,47 @@ public class ProductDao {
 
     public List<StatsDTO> findTopPurchasedProductsByUser(Long userId, int limit) {
         try (Session session = sessionFactory.openSession()) {
-            return session.createQuery(
-                            "SELECT new com.bfs.hibernateprojectdemo.dto.StatsDTO(p, SUM(oi.quantity)) " +
-                                    "FROM Order o " +
-                                    "JOIN o.orderItems oi " +
-                                    "JOIN oi.product p " +
-                                    "WHERE o.user.userId = :userId AND o.orderStatus <> 'Canceled' " +
-                                    "GROUP BY p.productId " +
-                                    "ORDER BY SUM(oi.quantity) DESC, MIN(oi.itemId) ASC", StatsDTO.class)
-                    .setParameter("userId", userId)
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<StatsDTO> query = cb.createQuery(StatsDTO.class);
+
+            // Root entity
+            Root<Order> orderRoot = query.from(Order.class);
+            System.out.println(orderRoot.getModel());
+            Join<Order, OrderItem> orderItemJoin = orderRoot.join("orderItems");
+            Join<OrderItem, Product> productJoin = orderItemJoin.join("product");
+
+            query.groupBy(productJoin.get("productId"));
+
+            Expression<Long> sumQuantity = cb.sum(orderItemJoin.get("quantity"));
+
+            query.select(cb.construct(
+                    StatsDTO.class,
+                    productJoin,
+                    sumQuantity
+            ));
+
+            query.where(
+                    cb.and(
+                            cb.equal(orderRoot.get("user").get("userId"), userId),
+                            cb.notEqual(orderRoot.get("orderStatus"), "Canceled")
+                    )
+            );
+
+            // Order by quantity DESC
+            query.orderBy(cb.desc(sumQuantity));
+
+            return session.createQuery(query)
                     .setMaxResults(limit)
                     .getResultList();
         }
     }
 
-    public void saveProduct(Product product) {
+    public Long saveProduct(Product product) {
         try (Session session = sessionFactory.openSession()) {
             Transaction tx = session.beginTransaction();
             session.save(product);
             tx.commit();
+            return product.getProductId();
         }
     }
 

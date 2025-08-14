@@ -1,9 +1,11 @@
 package com.bfs.hibernateprojectdemo.controller;
 
 import com.bfs.hibernateprojectdemo.dto.StatsDTO;
+import com.bfs.hibernateprojectdemo.dto.common.DataResponse;
 import com.bfs.hibernateprojectdemo.service.ProductService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,10 +23,17 @@ public class StatsController {
         this.productService = productService;
     }
 
-    @PreAuthorize("hasRole(0)")
+//    @PreAuthorize("hasRole('USER')")
     @GetMapping("/products/recent/{limit}/user/{userId}")
-    public List<StatsDTO> getRecentlyPurchasedProducts(@PathVariable Long userId,
-                                                       @PathVariable Integer limit) {
-        return productService.getTopPurchasedProducts(userId, limit);
+    public ResponseEntity<DataResponse> getRecentlyPurchasedProducts(@PathVariable Long userId,
+                                                                     @PathVariable Integer limit) {
+        List<StatsDTO> stats = productService.getTopRecentPurchasedProducts(userId, limit);
+
+        DataResponse dataResponse = DataResponse.builder()
+                .data(stats)
+                .message("Most recently purchased product")
+                .build();
+
+        return ResponseEntity.ok().body(dataResponse);
     }
 }

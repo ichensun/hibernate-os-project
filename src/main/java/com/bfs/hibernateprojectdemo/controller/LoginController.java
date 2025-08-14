@@ -34,7 +34,6 @@ public class LoginController {
         this.jwtProvider = jwtProvider;
     }
 
-    @PreAuthorize("hasRole('USER')")
     @PostMapping("/login")
     public LoginResponse login(@RequestBody LoginRequest request) {
 
