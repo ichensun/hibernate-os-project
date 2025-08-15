@@ -5,7 +5,6 @@ import com.bfs.hibernateprojectdemo.domain.User;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
-import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -24,7 +23,7 @@ public class SignupDao {
     public Optional<User> findUserByUsername(String username) {
         try (Session session = sessionFactory.openSession()) {
 
-            String hql = "FROM users u WHERE u.username = :username";
+            String hql = "FROM User u WHERE u.username = :username";
             return session.createQuery(hql, User.class)
                     .setParameter("username", username)
                     .setMaxResults(1)
@@ -36,14 +35,14 @@ public class SignupDao {
         return Optional.empty();
     }
 
-    public User createUser(String userName, String email,
+    public User createUser(String username, String email,
                            String encryptedPassword) {
 
         Session session = sessionFactory.openSession();
         Transaction transaction = session.beginTransaction();
 
         User user = User.builder()
-                .username(userName)
+                .username(username)
                 .password(encryptedPassword)
                 .role(0)
                 .email(email)
@@ -51,7 +50,7 @@ public class SignupDao {
 
         session.save(user);
         transaction.commit();
-        session.close();
+
         return user;
     }
 }

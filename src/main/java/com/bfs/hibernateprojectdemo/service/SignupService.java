@@ -5,6 +5,7 @@ import com.bfs.hibernateprojectdemo.domain.User;
 import com.bfs.hibernateprojectdemo.dto.auth.RegistrationRequest;
 import com.bfs.hibernateprojectdemo.exception.UsernameFoundException;
 
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 public class SignupService {
 
     private final SignupDao signupDao;
-    private final PasswordEncoder encoder;
+    private final PasswordEncoder passwordEncoder;
 
     public User signup(RegistrationRequest request) {
 
@@ -33,8 +34,8 @@ public class SignupService {
                     " use a different username");
         }
 
-        User savedUser = signupDao.createUser(userName, email,
-                encoder.encode(password));
+        String encodedPassword = passwordEncoder.encode(password);
+        User savedUser = signupDao.createUser(userName, email, encodedPassword);
 
         return User.builder()
                 .userId(savedUser.getUserId())

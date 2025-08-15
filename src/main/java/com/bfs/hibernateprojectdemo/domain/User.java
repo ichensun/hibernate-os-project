@@ -20,11 +20,11 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-@Entity(name="users")
+@Entity
 @Table(name="users")
 @Getter
 @Setter
-@ToString(exclude = {"permissions"})
+@ToString(exclude = {"permissions", "orders"})
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -47,11 +47,11 @@ public class User {
     @Column(name = "username")
     private String username;
 
-    @ManyToMany(mappedBy = "users")
-    private List<Product> products;
+    @ManyToMany(mappedBy = "users", fetch = FetchType.LAZY)
+    private List<Product> watchlist;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
-    private List<Permission> permissions;
+//    @OneToMany(fetch = FetchType.EAGER, mappedBy = "user")
+//    private List<Permission> permissions;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch =
             FetchType.LAZY)

@@ -10,6 +10,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -19,9 +20,10 @@ import lombok.ToString;
 @Table(name = "order_item")
 @Getter
 @Setter
-@ToString
+@ToString(exclude = {"product", "order"})
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class OrderItem {
 
     @Id
@@ -39,11 +41,10 @@ public class OrderItem {
     private Double wholesalePrice;
 
     @ManyToOne
-    @JoinColumn(name = "fk_order_item_order", referencedColumnName = "order_id")
+    @JoinColumn(name = "order_id")
     private Order order;
 
     @ManyToOne
-    @JoinColumn(name = "fk_order_item_product", referencedColumnName =
-            "product_id")
+    @JoinColumn(name = "product_id")
     private Product product;
 }

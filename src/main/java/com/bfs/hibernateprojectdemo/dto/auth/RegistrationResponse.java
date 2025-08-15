@@ -16,8 +16,7 @@ public class RegistrationResponse {
 
     private Integer role;
 
-    @JsonProperty("username")
-    private String userName;
+    private String username;
 
     private String password;
 

@@ -16,6 +16,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UsernameFoundException.class)
     public ResponseEntity<DataResponse> handleUsernameFoundException(UsernameFoundException exception) {
+
         DataResponse body = DataResponse.builder()
                 .code(409)
                 .message(exception.getMessage())
@@ -23,4 +24,15 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(409).body(body);
     }
+
+    @ExceptionHandler(NotEnoughInventoryException.class)
+    public ResponseEntity<String> handleInventoryException(NotEnoughInventoryException ex) {
+        return ResponseEntity.badRequest().body(ex.getMessage());
+    }
+
+    @ExceptionHandler(CancelCompeteOrderException.class)
+    public ResponseEntity<String> handleCancelCompleteOrderException(CancelCompeteOrderException ex) {
+        return ResponseEntity.badRequest().body(ex.getMessage());
+    }
+
 }

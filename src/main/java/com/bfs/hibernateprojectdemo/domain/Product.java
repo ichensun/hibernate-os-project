@@ -1,10 +1,13 @@
 package com.bfs.hibernateprojectdemo.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -15,6 +18,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -24,9 +28,10 @@ import lombok.ToString;
 @Table(name = "product")
 @Getter
 @Setter
-@ToString
+@ToString(exclude = {"orderItems", "users"})
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Product {
 
     @Id
@@ -49,14 +54,16 @@ public class Product {
     @Column(name = "wholesale_price")
     private Double wholesalePrice;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "watchlist",
             joinColumns = @JoinColumn(name = "product_id"),
             inverseJoinColumns = @JoinColumn(name="user_id")
     )
+    @JsonIgnore
     private List<User> users;
 
-    @OneToMany(mappedBy = "product")
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<OrderItem> orderItems;
 }
