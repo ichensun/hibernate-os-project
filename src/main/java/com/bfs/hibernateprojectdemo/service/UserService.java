@@ -39,10 +39,11 @@ public class UserService implements UserDetailsService {
 
         return AuthUserDetail.builder()
                 .username(user.getUsername())
-                .password(new BCryptPasswordEncoder().encode(user.getPassword()))
+                .password(user.getPassword())
                 .authorities(getUserRole(user))
                 .accountNonExpired(true)
                 .accountNonLocked(true)
+                .credentialsNonExpired(true)
                 .enabled(true)
                 .build();
     }

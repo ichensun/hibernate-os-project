@@ -1,6 +1,6 @@
 package com.bfs.hibernateprojectdemo.config;
 
-//import com.bfs.hibernateprojectdemo.security.JwtFilter;
+import com.bfs.hibernateprojectdemo.security.JwtFilter;
 import com.bfs.hibernateprojectdemo.service.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,17 +23,17 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private UserService userService;
-//    private JwtFilter jwtFilter;
+    private JwtFilter jwtFilter;
 
     @Autowired
     public void setUserService(UserService userService) {
         this.userService = userService;
     }
 
-//    @Autowired
-//    public void setJwtFilter(JwtFilter jwtFilter) {
-//        this.jwtFilter = jwtFilter;
-//    }
+    @Autowired
+    public void setJwtFilter(JwtFilter jwtFilter) {
+        this.jwtFilter = jwtFilter;
+    }
 
     @Bean
     public AuthenticationManager authenticationManagerBean(HttpSecurity http) throws Exception {
@@ -48,7 +48,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.cors().and().csrf().disable()
-//                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests()
                 .antMatchers(HttpMethod.POST,"/signup").permitAll()
                 .antMatchers(HttpMethod.POST,"/login").permitAll()
@@ -59,8 +59,9 @@ public class SecurityConfig {
 //                .antMatchers("/watchlist/*/products/all").permitAll()
 //                .antMatchers("/watchlist/product/*/user/*").permitAll()
 //                .antMatchers("/products").permitAll()
-                .antMatchers(HttpMethod.GET,"/products/recent/*/user/*").permitAll()
-                .anyRequest().authenticated();
+//                .antMatchers(HttpMethod.GET,"/products/recent/*/user/*").permitAll()
+                .anyRequest()
+                .authenticated();
         return http.build();
     }
 
